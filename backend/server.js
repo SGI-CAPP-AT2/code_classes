@@ -60,6 +60,10 @@ app.get("/image", async (req, res) => {
   }
 });
 
+app.get("/fetch/problems/:id", async (req, res) => {
+  const id = req.params.id;
+});
+
 app.listen(PORT, () =>
   console.log(`Server running on http://localhost:${PORT}`)
 );

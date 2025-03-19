@@ -7,6 +7,7 @@ import {
 } from "../GLOBALS.js";
 import fs, { rm } from "fs";
 import { User } from "../models/User.js";
+import { Token } from "../models/Token.js";
 export const getUserDetailsFromFetch = async () => {
   if (!fs.existsSync(USER_TOKEN_FILE)) return new User({ err: true });
   const token = fs.readFileSync(USER_TOKEN_FILE).toString();
@@ -38,4 +39,9 @@ export const deleteUserDetails = async () => {
     )
   );
   return err != null && true;
+};
+export const getUserToken = () => {
+  if (!fs.existsSync(USER_TOKEN_FILE)) return Token({ err: true });
+  const token = fs.readFileSync(USER_TOKEN_FILE).toString();
+  return Token({ token });
 };

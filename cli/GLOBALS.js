@@ -17,3 +17,6 @@ export const GOOGLE_USER_DETAILS_API =
   "https://www.googleapis.com/oauth2/v1/userinfo?access_token=%ACCESS_TOKEN%";
 
 export const AUTH_URL = `http://localhost:${SERVER_PORT}/auth/google`;
+
+export const API_BASE = `http://localhost:${SERVER_PORT}/`;
+export const API_FETCH = "http//localhost:${SERVER_PORT}/fetch/%PROBLEM_ID%";

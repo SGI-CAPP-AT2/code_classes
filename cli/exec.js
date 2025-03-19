@@ -3,7 +3,7 @@ import * as commands from "./command/commands.js";
 import { CommandInput } from "./models/CommanInput.js";
 import { init, rollback_init } from "./setup/init.js";
 import { writeOutput } from "./utils/command_outputs.js";
-import { getUserDetailsFromCache } from "./utils/user_details.js";
+import { getUserDetailsFromCache, getUserToken } from "./utils/user_details.js";
 
 export const execute = async (args) => {
   const _command = args[2];
@@ -14,6 +14,7 @@ export const execute = async (args) => {
     init(_command);
     const args = _args;
     const user = getUserDetailsFromCache();
+    const token = getUserToken();
     const command = _command;
     /**
      * @type {CommandResult}
@@ -23,6 +24,7 @@ export const execute = async (args) => {
         args,
         user,
         command,
+        token,
       })
     );
     console.log(writeOutput(_res));

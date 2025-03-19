@@ -10,6 +10,7 @@ import { ServerConfig } from "../server/ServerConfig.js";
 import { ServerPath } from "../server/ServerPath.js";
 import { startServer } from "../server/start.js";
 import {
+  CommandResult,
   FailedCommandResult,
   PendingCommandResult,
   SuccessCommandResult,
@@ -22,6 +23,8 @@ import {
   getUserDetailsFromFetch,
 } from "../utils/user_details.js";
 import { CommandInput } from "../models/CommanInput.js";
+import { fetchProblem } from "../utils/api.js";
+import { saveProblem } from "../utils/fs_op.js";
 export const hello =
   /**
    * This is simple command used for testing purpose.
@@ -120,7 +123,7 @@ export const logout =
   /**
    * this command is used to logout the user.
    * @param {CommandInput} anonymous_0
-   * @returns {CommandResult} Logged in successfully!
+   * @returns {CommandResult} Successfully Logged out !
    */
   async ({ user }) => {
     const failReturn = new FailedCommandResult(
@@ -131,4 +134,40 @@ export const logout =
     return !err
       ? new SuccessCommandResult("Successfully Logged out !")
       : failReturn;
+  };
+export const fetch =
+  /**
+   * this command is used to fetch questions
+   * @param {CommandInput} anonymous_0
+   * @returns {CommandResult}
+   */
+  async ({ token, args }) => {
+    const failLoginReturn = new FailedCommandResult(
+      "Unable to logout ! May be you're not logged in."
+    );
+    const failArgReturn = new FailedCommandResult("Expected 1 arg, id?");
+    const failForFetchError = new FailedCommandResult(
+      "Something went wrong! may be you dont have internet"
+    );
+    if (token.err) return failLoginReturn;
+    if (!args[0]) return failArgReturn;
+    const id = args[0];
+    const problem = await fetchProblem(id);
+    if (problem.err) return failForFetchError;
+    saveProblem(problem);
+    return SuccessCommandResult(
+      "Saved Question in this directory Edit Solution file"
+    );
+  };
+
+export const push =
+  /**
+   * this command is used to push questions
+   * @param {CommandInput} anonymous_0
+   * @returns {CommandResult}
+   */
+  async ({ token, args }) => {
+    const failLoginReturn = new FailedCommandResult(
+      "Unable to logout ! May be you're not logged in."
+    );
   };
