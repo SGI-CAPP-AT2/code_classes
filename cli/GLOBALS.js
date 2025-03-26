@@ -23,3 +23,4 @@ export const API_BASE = `http://localhost:${SERVER_PORT}/`;
 export const API_FETCH = `http://localhost:${SERVER_PORT}/fetch/problems/%PROBLEM_ID%`;
 export const API_ADD_PROB = `http://localhost:${SERVER_PORT}/add/problem`;
 export const API_ADD_SOL = `http://localhost:${SERVER_PORT}/add/solution`;
+export const API_GET_SOL = `http://localhost:${SERVER_PORT}/fetch/solutions/%PROBLEM_ID%`;

@@ -1,4 +1,9 @@
-import { API_ADD_PROB, API_ADD_SOL, API_FETCH } from "../GLOBALS.js";
+import {
+  API_ADD_PROB,
+  API_ADD_SOL,
+  API_FETCH,
+  API_GET_SOL,
+} from "../GLOBALS.js";
 import prob from "../../backend/models/Problem.js";
 
 export const fetchProblem =
@@ -46,3 +51,19 @@ export const postSolution = async (prob) => {
     return undefined;
   }
 };
+export const fetchSolutions =
+  /**
+   *
+   * @param {string} forid
+   * @returns {Problem}
+   */
+  async (forid) => {
+    try {
+      const res = await fetch(API_GET_SOL.replace("%PROBLEM_ID%", forid));
+      const solutions = await res.json();
+      if (res.ok == false) return { err: solutions.error };
+      return solutions;
+    } catch (error) {
+      return { err: error };
+    }
+  };

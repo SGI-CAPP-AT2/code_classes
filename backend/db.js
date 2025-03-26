@@ -43,6 +43,10 @@ async function openDBProblems(filename = ":memory:") {
       return await db.get(`SELECT * FROM problems WHERE id = ?`, id);
     },
 
+    async getSolutions(id) {
+      return await db.all(`SELECT * FROM solutions WHERE problem = ?`, id);
+    },
+
     async delete(id) {
       await db.run(`DELETE FROM problems WHERE id = ?`, id);
     },

@@ -19,11 +19,15 @@ import { existsSync, mkdirSync, writeFileSync } from "fs";
 import { getPage } from "../pages/getPage.js";
 import {
   deleteUserDetails,
-  getUserDetailsFromCache,
   getUserDetailsFromFetch,
 } from "../utils/user_details.js";
 import { CommandInput } from "../models/CommanInput.js";
-import { fetchProblem, postProblem, postSolution } from "../utils/api.js";
+import {
+  fetchProblem,
+  fetchSolutions,
+  postProblem,
+  postSolution,
+} from "../utils/api.js";
 import {
   compressProblem,
   compressSolution,
@@ -32,6 +36,9 @@ import {
   saveProblem,
 } from "../utils/fs_op.js";
 import { runTests } from "../utils/executor.js";
+import { chdir } from "process";
+import path from "path";
+import writeXlsxFile from "write-excel-file/node";
 
 export const hello =
   /**
@@ -218,25 +225,95 @@ export const test =
    * @param {CommandInput} anonymous_0
    * @returns {CommandResult}
    */
-  async ({ cwd }) => {
-    const result = runTests(cwd);
-    if (result.success)
-      return new SuccessCommandResult(
-        "All tests passed ! You're good coder ig."
+  async ({ cwd, args }) => {
+    if (args.length == 0) {
+      const result = runTests(cwd);
+      if (result.success)
+        return new SuccessCommandResult(
+          "All tests passed ! You're good coder ig."
+        );
+      return new FailedCommandResult(
+        "Test failed at test case: " +
+          result.failedTestIndex +
+          "\n" +
+          "Input: " +
+          result.input +
+          "\n" +
+          "Expected Output: " +
+          result.expectedOutput +
+          "\n" +
+          "Output: " +
+          result.output
       );
-    return new FailedCommandResult(
-      "Test failed at test case: " +
-        result.failedTestIndex +
-        "\n" +
-        "Input: " +
-        result.input +
-        "\n" +
-        "Expected Output: " +
-        result.expectedOutput +
-        "\n" +
-        "Output: " +
-        result.output
-    );
+    } else if (args.length == 1) {
+      const results = [
+        [
+          {
+            value: "Author",
+            fontWeight: "bold",
+          },
+          {
+            value: "Pass/Fail",
+            fontWeight: "bold",
+          },
+          {
+            value: "Failed Case",
+            fontWeight: "bold",
+          },
+          {
+            value: "Time",
+            fontWeight: "bold",
+          },
+        ],
+      ];
+      const solutions = await fetchSolutions(args[0]);
+      const problem = await fetchProblem(args[0]);
+      if (problem.err)
+        return new FailedCommandResult(
+          "Unable to fetch problem !" + problem.err
+        );
+      if (solutions.err)
+        return new FailedCommandResult(
+          "Unable to fetch solutions !" + solutions.err
+        );
+      mkdirSync("Solutions", { recursive: true });
+      for (let i = 0; i < solutions.length; i++) {
+        const solution = solutions[i];
+        const dir_name = i + "(" + solution.author + ")";
+        const path_to_this = path.join(cwd, "Solutions", dir_name);
+        mkdirSync(path_to_this, { recursive: true });
+        writeFileSync(path.join(path_to_this, "Solution.java"), solution.code);
+        writeFileSync(path.join(path_to_this, "tests"), problem.tests);
+        const start = Date.now();
+        const result = runTests(path.join(cwd, "Solutions", dir_name), cwd);
+        const end = Date.now();
+        results.push([
+          {
+            type: String,
+            value: solution.author,
+          },
+          {
+            type: String,
+            value: result.success ? "Pass" : "Fail",
+          },
+          {
+            type: String,
+            value: result.success ? "NA" : result.failedTestIndex,
+          },
+          {
+            type: String,
+            value: end - start + "ms",
+          },
+        ]);
+      }
+      chdir(cwd);
+      await writeXlsxFile(results, {
+        filePath: path.join(cwd, "Solutions.xlsx"),
+      });
+      return new SuccessCommandResult(
+        "Tested all solutions and I have generated report in this directory"
+      );
+    }
   };
 
 export const submit =
@@ -256,5 +333,18 @@ export const submit =
           "Solution submitted successfully with id: " + id
         );
       return new FailedCommandResult("Unable to submit solution");
-    }
+    } else
+      return new FailedCommandResult(
+        "Test failed at test case: " +
+          result.failedTestIndex +
+          "\n" +
+          "Input: " +
+          result.input +
+          "\n" +
+          "Expected Output: " +
+          result.expectedOutput +
+          "\n" +
+          "Output: " +
+          result.output
+      );
   };

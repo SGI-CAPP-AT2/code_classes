@@ -4,7 +4,7 @@ import { execSync } from "child_process";
 import fs from "fs";
 import path from "path";
 
-export function runTests(cwd) {
+export function runTests(cwd, backto) {
   const javaFilePath = path.join(cwd, "Solution.java");
   const testsFilePath = path.join(cwd, "tests");
   if (!fs.existsSync(javaFilePath)) {
@@ -27,10 +27,12 @@ export function runTests(cwd) {
     const { dataType, input, expectedOutput } = tests[i];
     let formattedInput = formatInput(input, dataType);
     try {
+      console.log(process.cwd());
       let output = execSync(`java Solution ${dataType} "${formattedInput}"`)
         .toString()
         .trim();
       if (output !== expectedOutput.join("\n")) {
+        chdir(backto);
         return {
           success: false,
           failedTestIndex: i + 1,
@@ -40,6 +42,7 @@ export function runTests(cwd) {
         };
       }
     } catch (err) {
+      chdir(backto);
       return {
         success: false,
         failedTestIndex: i + 1,
@@ -50,7 +53,7 @@ export function runTests(cwd) {
       };
     }
   }
-
+  chdir(backto);
   return { success: true };
 }
 

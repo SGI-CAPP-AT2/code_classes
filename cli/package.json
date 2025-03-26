@@ -15,6 +15,7 @@
     "express": "^4.21.2",
     "firebase": "^11.2.0",
     "open": "^10.1.0",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^5.1.7",
+    "write-excel-file": "^2.3.2"
   }
 }

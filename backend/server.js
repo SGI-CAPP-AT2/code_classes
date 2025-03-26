@@ -105,6 +105,18 @@ app.get("/fetch/problems/:id", async (req, res) => {
   res.json(problem);
 });
 
+app.get("/fetch/solutions/:id", async (req, res) => {
+  const id = req.params.id;
+  const db = await openDBProblems("problems.db");
+  const problem = await db.get(id);
+  const solutions = await db.getSolutions(id);
+  if (!problem)
+    return res
+      .status(404)
+      .json({ error: "Check your id, I cant create problems by myself." });
+  res.json(solutions);
+});
+
 app.listen(PORT, () =>
   console.log(`Server running on http://localhost:${PORT}`)
 );
