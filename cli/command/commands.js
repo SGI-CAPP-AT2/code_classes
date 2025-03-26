@@ -1,5 +1,6 @@
 import open from "open";
 import {
+  APP_DIR,
   AUTH_URL,
   LOGIN_PORT,
   PAGES_LOGIN_SUCESS,
@@ -25,6 +26,7 @@ import { CommandInput } from "../models/CommanInput.js";
 import {
   fetchProblem,
   fetchSolutions,
+  getApiUrl,
   postProblem,
   postSolution,
 } from "../utils/api.js";
@@ -59,7 +61,7 @@ export const login =
   async ({ user, command }) => {
     if (!user.err) return new FailedCommandResult("Already Logged In !");
     const pendingRes = new PendingCommandResult(
-      "Login is available at " + AUTH_URL,
+      "Login is available at " + getApiUrl(AUTH_URL),
       {
         onCompleteTask: (val) => {
           return "Logged in successfully with email: " + val.email;
@@ -264,6 +266,14 @@ export const test =
             value: "Time",
             fontWeight: "bold",
           },
+          {
+            value: "Time in numbers",
+            fontWeight: "bold",
+          },
+          {
+            value: "id",
+            fontWeight: "bold",
+          },
         ],
       ];
       const solutions = await fetchSolutions(args[0]);
@@ -304,10 +314,27 @@ export const test =
             type: String,
             value: end - start + "ms",
           },
+          {
+            type: Number,
+            value: end - start,
+          },
+          {
+            type: String,
+            value: solution.id,
+          },
         ]);
       }
       chdir(cwd);
       await writeXlsxFile(results, {
+        columns: [
+          { width: 40 },
+          { width: 9 },
+          { width: 10 },
+          { width: 5 },
+          { width: 16 },
+          { width: 80 },
+        ],
+        stickyRowsCount: 1,
         filePath: path.join(cwd, "Solutions.xlsx"),
       });
       return new SuccessCommandResult(
@@ -347,4 +374,19 @@ export const submit =
           "Output: " +
           result.output
       );
+  };
+export const set =
+  /**
+   * this command is used to test questions
+   * @param {CommandInput} anonymous_0
+   * @returns {CommandResult}
+   */
+  async ({ args, cwd }) => {
+    if (args.length < 2) return new FailedCommandResult("Expected 2 arg");
+    const configs = existsSync(path.join(APP_DIR, ".configs"))
+      ? JSON.parse(readFileSync(path.join(APP_DIR, ".configs")))
+      : {};
+    configs[args[0]] = args[1];
+    writeFileSync(path.join(APP_DIR, ".configs"), JSON.stringify(configs));
+    return new SuccessCommandResult("Set " + args[0] + " to " + args[1]);
   };

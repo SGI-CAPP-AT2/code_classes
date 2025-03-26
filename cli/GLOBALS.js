@@ -16,11 +16,10 @@ export const PAGES_LOGIN_SUCESS = path.join(PAGES_DIR, "loginSuccessful.html");
 // API ENDPOINTS
 export const GOOGLE_USER_DETAILS_API =
   "https://www.googleapis.com/oauth2/v1/userinfo?access_token=%ACCESS_TOKEN%";
-
-export const AUTH_URL = `http://localhost:${SERVER_PORT}/auth/google`;
-
-export const API_BASE = `http://localhost:${SERVER_PORT}/`;
-export const API_FETCH = `http://localhost:${SERVER_PORT}/fetch/problems/%PROBLEM_ID%`;
-export const API_ADD_PROB = `http://localhost:${SERVER_PORT}/add/problem`;
-export const API_ADD_SOL = `http://localhost:${SERVER_PORT}/add/solution`;
-export const API_GET_SOL = `http://localhost:${SERVER_PORT}/fetch/solutions/%PROBLEM_ID%`;
+// PATHS FOR API ENDPOINTS
+export const AUTH_URL = `/auth/google`;
+export const API_BASE = `/`;
+export const API_FETCH = `/fetch/problems/%PROBLEM_ID%`;
+export const API_ADD_PROB = `/add/problem`;
+export const API_ADD_SOL = `/add/solution`;
+export const API_GET_SOL = `/fetch/solutions/%PROBLEM_ID%`;

@@ -27,7 +27,6 @@ export function runTests(cwd, backto) {
     const { dataType, input, expectedOutput } = tests[i];
     let formattedInput = formatInput(input, dataType);
     try {
-      console.log(process.cwd());
       let output = execSync(`java Solution ${dataType} "${formattedInput}"`)
         .toString()
         .trim();

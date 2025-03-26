@@ -5,6 +5,11 @@ import {
   API_GET_SOL,
 } from "../GLOBALS.js";
 import prob from "../../backend/models/Problem.js";
+import { getConfig } from "./configs.js";
+
+export const getApiUrl = (pathToResource) => {
+  return `${getConfig("SERVER")}${pathToResource}`;
+};
 
 export const fetchProblem =
   /**
@@ -14,7 +19,9 @@ export const fetchProblem =
    */
   async (forid) => {
     try {
-      const problem = await fetch(API_FETCH.replace("%PROBLEM_ID%", forid));
+      const problem = await fetch(
+        getApiUrl(API_FETCH).replace("%PROBLEM_ID%", forid)
+      );
       const problem_json = await problem.json();
       if (problem.ok == false)
         return new prob.Problem({ err: problem_json.error });
@@ -25,7 +32,7 @@ export const fetchProblem =
   };
 export const postProblem = async (prob) => {
   try {
-    const res = await fetch(API_ADD_PROB, {
+    const res = await fetch(getApiUrl(API_ADD_PROB), {
       method: "POST",
       headers: { "Content-Type": "application/json" }, // Add this line
       body: JSON.stringify(prob),
@@ -39,7 +46,7 @@ export const postProblem = async (prob) => {
 };
 export const postSolution = async (prob) => {
   try {
-    const res = await fetch(API_ADD_SOL, {
+    const res = await fetch(getApiUrl(API_ADD_SOL), {
       method: "POST",
       headers: { "Content-Type": "application/json" }, // Add this line
       body: JSON.stringify(prob),
@@ -59,7 +66,9 @@ export const fetchSolutions =
    */
   async (forid) => {
     try {
-      const res = await fetch(API_GET_SOL.replace("%PROBLEM_ID%", forid));
+      const res = await fetch(
+        getApiUrl(API_GET_SOL).replace("%PROBLEM_ID%", forid)
+      );
       const solutions = await res.json();
       if (res.ok == false) return { err: solutions.error };
       return solutions;
