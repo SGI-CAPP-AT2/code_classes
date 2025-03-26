@@ -1,5 +1,5 @@
 const path = require("path");
-const { Problem } = require("../models/Problem");
+const { Problem } = require("../../backend/models/Problem");
 const fs = require("fs");
 const crypto = require("crypto");
 

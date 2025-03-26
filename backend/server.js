@@ -3,6 +3,9 @@ const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const dotenv = require("dotenv");
 const cors = require("cors");
+const hash = require("object-hash");
+const { Problem } = require("./models/Problem");
+const { openDBProblems } = require("./db");
 
 dotenv.config();
 
@@ -60,8 +63,19 @@ app.get("/image", async (req, res) => {
   }
 });
 
+app.get("/add/problem", async (req, res) => {
+  const { question, tests, boiler } = req.body;
+  const problem = new Problem(question, tests, boiler);
+  const db = await openDBProblems();
+  const id = db.add(problem);
+  res.json({ id });
+});
+
 app.get("/fetch/problems/:id", async (req, res) => {
   const id = req.params.id;
+  const db = await openDBProblems();
+  const problem = db.get(id);
+  res.json(problem);
 });
 
 app.listen(PORT, () =>

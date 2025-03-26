@@ -1,5 +1,5 @@
 const { API_FETCH } = require("../GLOBALS");
-const { Problem } = require("../models/Problem");
+const { Problem } = require("../../backend/models/Problem");
 
 export const fetchProblem =
   /**
