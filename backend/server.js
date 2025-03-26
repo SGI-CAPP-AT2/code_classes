@@ -3,9 +3,10 @@ const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const dotenv = require("dotenv");
 const cors = require("cors");
-const hash = require("object-hash");
 const { Problem } = require("./models/Problem");
-const { openDBProblems } = require("./db");
+const { openDBProblems, openDBSolutions } = require("./db");
+const { Solution } = require("./models/Solution");
+const { fetchUser } = require("./utils/user");
 
 dotenv.config();
 
@@ -74,10 +75,33 @@ app.post("/add/problem", async (req, res) => {
   res.json({ id });
 });
 
+app.post("/add/solution", async (req, res) => {
+  const { problem, code, token } = req.body;
+  const pdb = await openDBProblems("problems.db");
+  const prob = await pdb.get(problem);
+  console.log(prob);
+  if (!prob)
+    return res.status(404).json({
+      error:
+        "Check your problem may be it's deleted, I cant create problems by myself.",
+    });
+  const solution = new Solution({ problem, code });
+  const user = await fetchUser(token);
+  solution.author = user.email;
+  const db = await openDBSolutions("problems.db");
+  const id = await db.add(solution);
+  res.json({ id });
+});
+
 app.get("/fetch/problems/:id", async (req, res) => {
   const id = req.params.id;
   const db = await openDBProblems("problems.db");
-  const problem = db.get(id);
+  const problem = await db.get(id);
+  console.log(problem);
+  if (!problem)
+    return res
+      .status(404)
+      .json({ error: "Check your id, I cant create problems by myself." });
   res.json(problem);
 });
 

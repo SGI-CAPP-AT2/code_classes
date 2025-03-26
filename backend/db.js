@@ -53,4 +53,52 @@ async function openDBProblems(filename = ":memory:") {
   };
 }
 
-module.exports = { openDBProblems };
+async function openDBSolutions(filename = ":memory:") {
+  const db = await open({
+    filename,
+    driver: sqlite3.Database,
+  });
+
+  await db.exec(`
+      CREATE TABLE IF NOT EXISTS solutions (
+        id TEXT PRIMARY KEY,
+        code TEXT,
+        problem TEXT,
+        author TEXT,
+        FOREIGN KEY (problem) REFERENCES problems(id) ON DELETE CASCADE
+      )
+    `);
+
+  return {
+    async add(solution) {
+      const id = hash({
+        code: solution.code,
+        problem: solution.problem,
+        author: solution.author,
+      });
+      if (await this.get(id)) return id;
+      await db.run(
+        `INSERT INTO solutions (id, code, problem, author) VALUES (?, ?, ?, ?)`,
+        id,
+        solution.code,
+        solution.problem,
+        solution.author
+      );
+      return id;
+    },
+
+    async get(id) {
+      return await db.get(`SELECT * FROM solutions WHERE id = ?`, id);
+    },
+
+    async delete(id) {
+      await db.run(`DELETE FROM solutions WHERE id = ?`, id);
+    },
+
+    async close() {
+      await db.close();
+    },
+  };
+}
+
+module.exports = { openDBProblems, openDBSolutions };

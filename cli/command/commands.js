@@ -23,18 +23,23 @@ import {
   getUserDetailsFromFetch,
 } from "../utils/user_details.js";
 import { CommandInput } from "../models/CommanInput.js";
-import { fetchProblem } from "../utils/api.js";
-import { saveProblem } from "../utils/fs_op.js";
+import { fetchProblem, postProblem, postSolution } from "../utils/api.js";
+import {
+  compressProblem,
+  compressSolution,
+  discardProblem,
+  initProblem,
+  saveProblem,
+} from "../utils/fs_op.js";
+import { runTests } from "../utils/executor.js";
+
 export const hello =
   /**
    * This is simple command used for testing purpose.
    * @returns {CommandResult} Hello World!
    */
-  async () => {
-    const cachedDetails = getUserDetailsFromCache();
-    const output = `Hello ${
-      !cachedDetails.err ? cachedDetails.name : "World"
-    }!`;
+  async ({ user }) => {
+    const output = `Hello ${!user.err ? user.name : "World"}!`;
     return new SuccessCommandResult(output);
   };
 
@@ -141,21 +146,22 @@ export const fetch =
    * @param {CommandInput} anonymous_0
    * @returns {CommandResult}
    */
-  async ({ token, args }) => {
+  async ({ token, args, cwd }) => {
     const failLoginReturn = new FailedCommandResult(
       "Unable to logout ! May be you're not logged in."
     );
-    const failArgReturn = new FailedCommandResult("Expected 1 arg, id?");
-    const failForFetchError = new FailedCommandResult(
-      "Something went wrong! may be you dont have internet"
+    const failArgReturn = new FailedCommandResult(
+      "Expected 1 arg, where is id? what should i fetch? btw I dont fetch water for you"
     );
     if (token.err) return failLoginReturn;
     if (!args[0]) return failArgReturn;
     const id = args[0];
     const problem = await fetchProblem(id);
-    if (problem.err) return failForFetchError;
-    saveProblem(problem);
-    return SuccessCommandResult(
+    if (problem.err)
+      return new FailedCommandResult("Something went wrong! " + problem.err);
+    saveProblem(problem, cwd);
+    writeFileSync("id", id);
+    return new SuccessCommandResult(
       "Saved Question in this directory Edit Solution file"
     );
   };
@@ -166,8 +172,89 @@ export const push =
    * @param {CommandInput} anonymous_0
    * @returns {CommandResult}
    */
-  async ({ token, args }) => {
+  async ({ token, cwd }) => {
     const failLoginReturn = new FailedCommandResult(
       "Unable to logout ! May be you're not logged in."
     );
+    if (token.err) return failLoginReturn;
+    const prob = compressProblem(cwd);
+    const id = await postProblem(prob);
+    if (id) {
+      writeFileSync("id", id);
+      return new SuccessCommandResult(
+        "Question pushed with id: " +
+          id +
+          "\nPlease note this id for future reference or question will be lost"
+      );
+    }
+    return new FailedCommandResult("Unable to push question");
+  };
+
+export const add =
+  /**
+   * this command is used to add questions
+   * @param {CommandInput} anonymous_0
+   * @returns {CommandResult}
+   */
+  async ({ cwd }) => {
+    initProblem(cwd);
+    return new SuccessCommandResult("Problem added in this directory");
+  };
+
+export const discard =
+  /**
+   * this command is used to add questions
+   * @param {CommandInput} anonymous_0
+   * @returns {CommandResult}
+   */
+  async ({ cwd }) => {
+    discardProblem(cwd);
+    return new SuccessCommandResult("Problem discarded from this directory");
+  };
+
+export const test =
+  /**
+   * this command is used to test questions
+   * @param {CommandInput} anonymous_0
+   * @returns {CommandResult}
+   */
+  async ({ cwd }) => {
+    const result = runTests(cwd);
+    if (result.success)
+      return new SuccessCommandResult(
+        "All tests passed ! You're good coder ig."
+      );
+    return new FailedCommandResult(
+      "Test failed at test case: " +
+        result.failedTestIndex +
+        "\n" +
+        "Input: " +
+        result.input +
+        "\n" +
+        "Expected Output: " +
+        result.expectedOutput +
+        "\n" +
+        "Output: " +
+        result.output
+    );
+  };
+
+export const submit =
+  /**
+   * this command is used to test questions
+   * @param {CommandInput} anonymous_0
+   * @returns {CommandResult}
+   */
+  async ({ cwd, token }) => {
+    const result = runTests(cwd);
+    if (result.success) {
+      const solution = compressSolution(cwd);
+      solution.token = token.token;
+      const id = await postSolution(solution);
+      if (id)
+        return new SuccessCommandResult(
+          "Solution submitted successfully with id: " + id
+        );
+      return new FailedCommandResult("Unable to submit solution");
+    }
   };

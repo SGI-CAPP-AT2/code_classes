@@ -5,6 +5,7 @@ export const SERVER_PORT = 3000;
 // PATHS FOR INSTALLATION
 export const INSTALL_DIR = import.meta.dirname;
 export const APP_DIR = path.join(INSTALL_DIR, ".code_classes");
+export const ASSETS_DIR = path.join(INSTALL_DIR, "assets");
 // PATHS FOR USER DETAILS
 export const USER_DETAILS_DIR = path.join(APP_DIR, ".user");
 export const USER_DETAILS_FILE = path.join(USER_DETAILS_DIR, "user.json");
@@ -19,4 +20,6 @@ export const GOOGLE_USER_DETAILS_API =
 export const AUTH_URL = `http://localhost:${SERVER_PORT}/auth/google`;
 
 export const API_BASE = `http://localhost:${SERVER_PORT}/`;
-export const API_FETCH = "http//localhost:${SERVER_PORT}/fetch/%PROBLEM_ID%";
+export const API_FETCH = `http://localhost:${SERVER_PORT}/fetch/problems/%PROBLEM_ID%`;
+export const API_ADD_PROB = `http://localhost:${SERVER_PORT}/add/problem`;
+export const API_ADD_SOL = `http://localhost:${SERVER_PORT}/add/solution`;

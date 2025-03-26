@@ -16,7 +16,7 @@ export const getUserDetailsFromFetch = async () => {
   );
   const userDetails = await res.json();
   cacheUserDetails(userDetails);
-  return new User(userDetails);
+  return new User(res.ok == false ? { err: true } : userDetails);
 };
 export const cacheUserDetails = async (userDetails) => {
   fs.writeFileSync(USER_DETAILS_FILE, JSON.stringify(userDetails));
@@ -41,7 +41,7 @@ export const deleteUserDetails = async () => {
   return err != null && true;
 };
 export const getUserToken = () => {
-  if (!fs.existsSync(USER_TOKEN_FILE)) return Token({ err: true });
+  if (!fs.existsSync(USER_TOKEN_FILE)) return new Token({ err: true });
   const token = fs.readFileSync(USER_TOKEN_FILE).toString();
-  return Token({ token });
+  return new Token({ token });
 };
