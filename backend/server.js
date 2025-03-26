@@ -63,17 +63,20 @@ app.get("/image", async (req, res) => {
   }
 });
 
-app.get("/add/problem", async (req, res) => {
+app.post("/add/problem", async (req, res) => {
   const { question, tests, boiler } = req.body;
-  const problem = new Problem(question, tests, boiler);
-  const db = await openDBProblems();
-  const id = db.add(problem);
+  console.log(req.body);
+  const problem = new Problem({ question, tests, boiler });
+  console.log(problem);
+  const db = await openDBProblems("problems.db");
+  const id = await db.add(problem);
+  console.log(id);
   res.json({ id });
 });
 
 app.get("/fetch/problems/:id", async (req, res) => {
   const id = req.params.id;
-  const db = await openDBProblems();
+  const db = await openDBProblems("problems.db");
   const problem = db.get(id);
   res.json(problem);
 });

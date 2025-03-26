@@ -1,4 +1,4 @@
-export class Problem {
+class Problem {
   /**
    * Class which represents User
    * @param {{ id : Number, question : string, tests: Array<string>, boiler : string, err:boolean}} object
@@ -11,3 +11,4 @@ export class Problem {
     this.err = err;
   }
 }
+module.exports = { Problem };

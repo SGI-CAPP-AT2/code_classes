@@ -6,7 +6,7 @@ function hash(obj) {
   return crypto.createHash("sha256").update(JSON.stringify(obj)).digest("hex");
 }
 
-export async function openDBProblems(filename = ":memory:") {
+async function openDBProblems(filename = ":memory:") {
   const db = await open({
     filename,
     driver: sqlite3.Database,
@@ -28,11 +28,12 @@ export async function openDBProblems(filename = ":memory:") {
         tests: problem.tests,
         boiler: problem.boiler,
       });
+      if (await this.get(id)) return id;
       await db.run(
         `INSERT INTO problems (id, question, tests, boiler) VALUES (?, ?, ?, ?)`,
         id,
         problem.question,
-        JSON.stringify(problem.tests),
+        problem.tests,
         problem.boiler
       );
       return id;
@@ -52,4 +53,4 @@ export async function openDBProblems(filename = ":memory:") {
   };
 }
 
-module.exports = openDB;
+module.exports = { openDBProblems };
